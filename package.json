@@ -4,20 +4,25 @@
 	"description": "",
 	"version": "0.0.1",
 	"engines": {
-		"vscode": "^1.55.0"
+		"vscode": "^1.53.0"
 	},
 	"categories": [
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:treecode.helloWorld"
+		"onCommand:treecode.dobuild",
+		"onCommand:treecode.invoke"
 	],
 	"main": "./extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "treecode.helloWorld",
-				"title": "Hello World"
+				"command": "treecode.dobuild",
+				"title": "treecode build"
+			},
+			{
+				"command": "treecode.invoke",
+				"title": "treecode invoke"
 			}
 		]
 	},

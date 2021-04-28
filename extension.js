@@ -4,12 +4,17 @@ const vscode = require('vscode');
 const install = require('install-package');
 var npmi = require('npmi');
 var options = {
-	name: 'tree-sitter',	// your module name
-	version: 'latest',		// expected version [default: 'latest']
-	path: __dirname,				// installation path [default: '.']
+	name: 'tree-sitter',
+	version: 'latest',
+	path: __dirname, // NOTE: this will write to the *current project's* package.json, you will probably want to be careful to make sure that doesn't get committed (or if it does, that it is excluded from npm pack?)
 	forceInstall: true,	// force install if set to true (even if already installed, it will do a reinstall) [default: false]
 	npmLoad: {				// npm.load(options, callback): this is the "options" given to npm.load()
-		loglevel: 'verbose'	// [default: {loglevel: 'silent'}]
+		loglevel: 'verbose',	// [default: {loglevel: 'silent'}]
+		/* this did not work, but leaving it here for now. setting env vars did work, maybe I was missing something here.
+		target: process.versions.electron,
+		arch: 'x64',
+		'dist-url': 'https://electronjs.org/headers',
+		*/
 	}
 };
 
@@ -33,8 +38,18 @@ function activate(context) {
 		// The code you place here will be executed every time your command is executed
 		console.log("building tree-sitter");
 
+		// Set environment variables on this process so that we build for the current version of electron.
+		// todo: revert to original values, or lack thereof, afterward
+		// https://www.electronjs.org/docs/tutorial/using-native-node-modules
+		process.env['npm_config_target'] = process.versions.electron;
+		process.env['npm_config_arch'] = "x64";
+		process.env['npm_config_target_arch'] = "x64";
+		process.env['npm_config_disturl'] = "https://electronjs.org/headers";
+		process.env['npm_config_runtime'] = "electron";
+		process.env['npm_config_build_from_source'] = true;
+
 		// Display a message box to the user
-		vscode.window.showInformationMessage('tree-sitter: starting build using npm ' + npmi.NPM_VERSION);
+		vscode.window.showInformationMessage('tree-sitter: starting build for node ' + process.version + ' using npm ' + npmi.NPM_VERSION);
 		npmi(options, function (err, result) {
 			if (err) {
 				if 		(err.code === npmi.LOAD_ERR) 	console.log('npm load error');
@@ -92,6 +107,7 @@ the module (for instance, using `npm rebuild` or `npm install`).
 
 		const callExpression = tree.rootNode.child(1).firstChild;
 		console.log(callExpression);
+		vscode.window.showInformationMessage(callExpression.toString());
 
 		// { type: 'call_expression',
 		//   startPosition: {row: 0, column: 16},
